@@ -1,9 +1,9 @@
 # Nordea-homebank
 Nordea to Homebank CVS converter
 
-Converts exported CVS files from Nordea Bank, into Homebank format.
+Converts exported CVS files from Nordea Bank (beta), into Homebank format.
 
-[Homebank](http://homebank.free.fr)
+[Homebank](http://homebank.free.fr) is a open source account manager.
 
 ## Requirements
 
