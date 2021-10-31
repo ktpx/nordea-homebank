@@ -1,0 +1,152 @@
+#!/usr/bin/perl 
+#
+# Script to Convert Nordea CVS exported transations to Homebank format.
+# Author : ktpx
+# License: GPLv3
+#
+## Nordea Sample Format
+#
+# Bokføringsdato;Beløp;Avsender;Mottaker;Navn;Tittel;Valuta
+# 25.10.2021;-8891,83;1111.22.33333;;;TIL NORDEA BANK ABP, FILIAL NORGE;NOK
+#
+## Homebank Sample Format
+#
+# Date, payment, info, memo, amount, category, tags
+# 15-02-04;0;;;Some cash;-40,00;Bill:Withdrawal of cash;tag1 tag2
+# 15-02-04;1;;;Internet DSL;-45,00;Inline service/Internet;tag2 my-tag3
+#
+## Payment types:
+# 0     None
+# 1 	Credit card
+# 2 	Cheque
+# 3 	Cash
+# 4 	Transfer
+# 5 	Internal transfer
+# 6 	Debit card
+# 7 	Standing order
+# 8 	Electronic payment
+# 9 	Deposit
+# 10 	FI fee
+#
+# Homebank https://homebank.free.fr
+##
+use strict;
+use warnings;
+use Switch;
+
+my $account = "";
+my $default_category="Annet";
+my $default_payment="8";
+
+my @data;
+my %hash = ( date   => "",
+             amount => 0,
+             from   => "",
+             to     => "",
+             name   => "",
+             title  => "",
+             curr   => "" );
+	      
+
+my %categories = ( 
+        "Expenses:Entertainment" => [ qw(netflix hbo youtube) ],
+);
+
+
+##
+# SUBS
+##
+
+## Fix date format.  Change as needed
+#
+sub fixdate {   
+   my $a = shift;
+   my ($d, $m, $y) = split(/\./, $a);
+   return ("$y-$m-$d");
+}
+
+## Search array items for keyword
+sub searchArr {
+    my $s = shift;
+    foreach my $item ( @_ ) {
+       if ( $s =~ /$item/i) { 
+          return 1 ;
+       };
+    }
+    return 0;
+}
+
+## Find category in hash
+sub getcat {
+  my $s = shift;
+     $s = lc $s;
+
+  for my $key (keys %categories) {
+      if (searchArr($s, @{$categories{$key}}) ) { 
+         return $key;
+      }
+  }
+  return $default_category;
+}
+
+## Print CSV entry in  Homebank format
+sub printHomebank {
+  
+  my $line = sprintf ("%s;%s;%s;%s;%s;%s;%s;%s",
+    $_[0]{'date'},   # Date
+    $default_payment,# Payment
+    $_[0]{'name'} ? $_[0]{'name'}: "Imported",  # Info
+    $_[0]{'title'},  # Payee
+    $_[0]{'from'},   # Memo 
+    $_[0]{'amount'}, # Amount
+    $_[0]{'cat'},    # Category
+    " "              # Tags
+  );
+  print "$line\n";
+}
+
+# Convert comma to period.
+sub fixamount {
+   my $amt = shift;
+   $amt =~ s/,/./;
+   return $amt;
+}
+
+sub main {
+  my $file = shift;
+  open FILE, "$file" or die "Error: Cant open file $_.\n";
+
+  while (<FILE>) {
+    chomp();
+    my @line = split(";", $_);
+    my %hash = ();
+
+#    $hash{'date'}   = fixdate($line[0]);
+    $hash{'date'}   = $line[0];
+    $hash{'amount'} = fixamount($line[1]);
+    $hash{'from'}   = $line[2];
+    $hash{'to'}     = $line[3];
+    $hash{'name'}   = $line[4];
+    $hash{'title'}  = $line[5];
+    $hash{'title'} =~ s/TIL\b\s//;    # Remove some common text prefixes to pretty the payees
+    $hash{'title'} =~ s/FRA\b\s//;    
+    $hash{'title'} =~ s/VIPPS\*\b\s//;
+    $hash{'curr'}   = $line[6];
+    $hash{'cat'}    = getcat($hash{'title'});
+
+    # Create array of hashes
+    push (@data, \%hash);
+  }
+}
+
+if (not @ARGV) {
+   print "Usage: homebank <filename.csv>\n";
+} else {
+
+  main($ARGV[0]);
+
+  foreach my $item (@data) { 
+     printHomebank($item);
+  }
+}
+
