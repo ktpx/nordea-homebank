@@ -5,14 +5,14 @@ Converts exported CVS files from Nordea Bank, into Homebank format.
 
 [Homebank](http://homebank.free.fr)
 
-Requirements
+## Requirements
 
   Perl :)
 
-Usage:
+## Usage:
 
 ```
-  $ nordea-homebank.pl <exported_file.csv> > homebank.csv
+  $ nordea-homebank <exported_file.csv> > homebank.csv
 ```
 
 You can edit the categories hash in the script, to suit your own needs.  The script
@@ -21,9 +21,11 @@ auto select the category.  Just look at your exported file, and fill in as neede
 This saves you a lot of time manually inputting categories.
 
 ```
-%categories = (  "Expenses:Dining"  => qw[ cafe restaurant mcdonalds egon burger ],
-                 "Bills:Electric"   => qw{ electric hafslund fortum energi ],
-                 "Mycategory:Subcat => qw{ keyword, keyword, name, whatever, } );
+%categories = 
+   (  "Expenses:Dining"  => qw[ cafe restaurant mcdonalds egon burger ],
+      "Bills:Electric"   => qw{ electric hafslund fortum energi ],
+      "Mycategory:Subcat => qw{ keyword, keyword, name, whatever, } 
+   );
 
 ```
 
