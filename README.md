@@ -8,6 +8,10 @@ Converts exported CVS files from Nordea Bank (beta), into Homebank format.
 ## Requirements
 
   Perl :)
+  
+## Perl dependencies
+
+Switch
 
 ## Usage:
 
