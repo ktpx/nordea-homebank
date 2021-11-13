@@ -29,8 +29,8 @@ in homebank before importing.
 ```
 %categories = 
    (  "Expenses:Dining"  => qw[ cafe restaurant mcdonalds egon burger ],
-      "Bills:Electric"   => qw{ electric hafslund fortum energi ],
-      "Mycategory:Subcat => qw{ keyword, keyword, name, whatever, } 
+      "Bills:Electric"   => qw[ electric hafslund fortum energi ],
+      "Mycategory:Subcat => qw[ keyword, keyword, name, whatever ]
    );
 
 ```
